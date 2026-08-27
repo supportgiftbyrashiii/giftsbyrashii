@@ -24,7 +24,7 @@ export async function validateCoupon(
   input: {
     code: string;
     lines: CouponLine[];
-    paymentMethod?: 'razorpay' | 'cod';
+    paymentMethod?: 'manual_upi' | 'razorpay' | 'cod';
     userId?: string | null;
   },
 ): Promise<ValidatedCoupon> {

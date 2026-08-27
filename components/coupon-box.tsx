@@ -19,7 +19,7 @@ export function CouponBox({
   onApplied,
 }: {
   items: { productId: string; quantity: number }[];
-  paymentMethod?: 'razorpay' | 'cod';
+  paymentMethod?: 'manual_upi' | 'razorpay' | 'cod';
   initialCode?: string;
   applied: AppliedCoupon | null;
   onApplied: (coupon: AppliedCoupon | null) => void;

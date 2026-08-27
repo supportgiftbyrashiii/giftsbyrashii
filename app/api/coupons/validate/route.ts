@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/server';
 const schema = z.object({
   code: z.string().min(1).max(50),
   items: z.array(z.object({ productId: z.string(), quantity: z.number().int().min(1).max(20) })).min(1),
-  paymentMethod: z.enum(['razorpay', 'cod']).optional(),
+  paymentMethod: z.enum(['manual_upi', 'razorpay', 'cod']).optional(),
 });
 
 export async function POST(request: Request) {
