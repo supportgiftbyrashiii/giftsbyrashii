@@ -8,8 +8,19 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { currentTimestamp } from '@/lib/time';
 import type { HomepageSection } from '@/lib/types';
 
+const rakhiSaleSection: HomepageSection = {
+  id: 'rakhi-sale',
+  type: 'rakhi_sale',
+  title: 'Rakhi gifts, wrapped in extra joy.',
+  subtitle: 'Celebrate the bond with thoughtful picks and festive savings on selected gifts.',
+  enabled: true,
+  sortOrder: 1.5,
+  config: {},
+};
+
 const defaultSections: HomepageSection[] = [
   ...demoHomepageSections,
+  rakhiSaleSection,
   { id: 'occasions', type: 'occasion_collection', title: 'Gifts for every beautiful reason', enabled: true, sortOrder: 4, config: {} },
   { id: 'prices', type: 'price_collection', title: 'Find their joy, your way', enabled: true, sortOrder: 5, config: {} },
   { id: 'hamper', type: 'custom_hamper', title: 'A hamper as unique as they are.', enabled: true, sortOrder: 6, config: {} },
@@ -36,7 +47,10 @@ export default async function Home() {
       supabase.from('testimonials').select('id,name,quote,rating').eq('is_enabled', true).order('sort_order').limit(8),
       supabase.from('reels').select('id,title,caption,video_url,thumbnail_url').eq('is_enabled', true).order('sort_order').limit(8),
     ]);
-    if (sectionRows?.length) sections = sectionRows.map((row): HomepageSection => ({ id: row.id, type: row.section_type, title: row.title ?? '', subtitle: row.subtitle ?? undefined, enabled: row.is_enabled, sortOrder: row.sort_order, config: (row.configuration ?? {}) as Record<string, unknown> }));
+    if (sectionRows?.length) {
+      sections = sectionRows.map((row): HomepageSection => ({ id: row.id, type: row.section_type, title: row.title ?? '', subtitle: row.subtitle ?? undefined, enabled: row.is_enabled, sortOrder: row.sort_order, config: (row.configuration ?? {}) as Record<string, unknown> }));
+      if (!sections.some((section) => section.type === 'rakhi_sale')) sections.push(rakhiSaleSection);
+    }
     if (bannerRows?.length) banners = bannerRows.map((row) => ({ id: row.id, title: row.title ?? 'A beautiful surprise', subtitle: row.subtitle ?? undefined, desktopImage: row.desktop_image, mobileImage: row.mobile_image ?? undefined, url: row.url ?? '/shop' }));
     testimonials = (testimonialRows ?? []).map((row) => ({ id: row.id, name: row.name, quote: row.quote, rating: row.rating ?? 5 }));
     if (reelRows?.length) reels = reelRows.map((row) => ({ id: row.id, title: row.title ?? 'GiftsByRashii moment', caption: row.caption ?? '', videoUrl: row.video_url, thumbnailUrl: row.thumbnail_url ?? undefined }));

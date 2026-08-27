@@ -11,6 +11,7 @@ import './responsive.css';
 import { CartProvider } from '@/components/cart-provider';
 import { ThemeStyle } from '@/components/theme-style';
 import { getSiteUrl, getSiteUrlObject } from '@/lib/site-url';
+import { OFFICIAL_STORE_DETAILS } from '@/lib/store-details';
 
 const manrope = Manrope({
   variable: '--font-manrope',
@@ -48,7 +49,7 @@ export default function RootLayout({
       >
         <ThemeStyle />
         <CartProvider>{children}</CartProvider>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({'@context':'https://schema.org','@type':'Organization',name:'GiftsByRashii',url:siteUrlString,logo:`${siteUrlString}/favicon.svg`}).replace(/</g,'\\u003c')}} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({'@context':'https://schema.org','@type':'Organization',name:OFFICIAL_STORE_DETAILS.legalName,alternateName:OFFICIAL_STORE_DETAILS.brandName,url:siteUrlString,logo:`${siteUrlString}/favicon.svg`,email:OFFICIAL_STORE_DETAILS.supportEmail,telephone:OFFICIAL_STORE_DETAILS.supportPhoneHref,address:{'@type':'PostalAddress',streetAddress:'4/1/24, K Sewani House, Lane Next To Mercedes Showroom, Nipania',addressLocality:'Indore',postalCode:'452010',addressRegion:'Madhya Pradesh',addressCountry:'IN'}}).replace(/</g,'\\u003c')}} />
       </body>
     </html>
   );

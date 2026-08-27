@@ -20,13 +20,14 @@ import {
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useCart } from './cart-provider';
+import { OFFICIAL_STORE_DETAILS } from '@/lib/store-details';
 
 type StoreConfig = {
   navigation?: { label: string; url: string }[];
   announcements?: { text: string }[];
   settings?: {
     shipping?: { freeShippingAbove?: number };
-    store?: { name?: string; supportEmail?: string; supportPhone?: string; whatsapp?: string };
+    store?: { name?: string; legalName?: string; supportEmail?: string; supportPhone?: string; whatsapp?: string; address?: string };
     social?: Record<string, string>;
   };
 };
@@ -102,10 +103,6 @@ export function SiteHeader() {
     };
   }, [open]);
 
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
-
   const isActive = (url: string) => {
     const target = url.split('?')[0];
     return target === '/' ? pathname === '/' : pathname === target || pathname.startsWith(`${target}/`);
@@ -180,8 +177,8 @@ export function SiteHeader() {
               {label}
             </Link>
           ))}
-          <Link href="/shop?sort=sale" className="sale-link">
-            The Gift Sale
+          <Link href="/rakhi-sale" className={`sale-link ${isActive('/rakhi-sale') ? 'active' : ''}`} aria-current={isActive('/rakhi-sale') ? 'page' : undefined}>
+            Rakhi Sale
           </Link>
         </nav>
       </header>
@@ -332,12 +329,12 @@ export function SiteHeader() {
                   </Link>
                 ))}
                 <Link
-                  href="/shop?sort=sale"
-                  className={`mobile-nav-item sale-item ${isActive('/shop?sort=sale') ? 'active' : ''}`}
+                  href="/rakhi-sale"
+                  className={`mobile-nav-item sale-item ${isActive('/rakhi-sale') ? 'active' : ''}`}
                   onClick={() => setOpen(false)}
                 >
-                  <span className="sale-text">✨ The Gift Sale</span>
-                  <span className="sale-pill">SALE</span>
+                  <span className="sale-text">✨ Rakhi Sale</span>
+                  <span className="sale-pill">OFFERS</span>
                 </Link>
               </nav>
             </div>
@@ -391,13 +388,18 @@ export function SiteFooter() {
               </>
             )}
           </div>
-          {store?.supportEmail && <a href={`mailto:${store.supportEmail}`}>{store.supportEmail}</a>}
-          {store?.supportPhone && <a href={`tel:${store.supportPhone}`}>{store.supportPhone}</a>}
+          <address className="footer-contact">
+            <b>{OFFICIAL_STORE_DETAILS.legalName}</b>
+            <span>{OFFICIAL_STORE_DETAILS.address}</span>
+            <a href={`mailto:${OFFICIAL_STORE_DETAILS.supportEmail}`}>{OFFICIAL_STORE_DETAILS.supportEmail}</a>
+            <a href={`tel:${OFFICIAL_STORE_DETAILS.supportPhoneHref}`}>{OFFICIAL_STORE_DETAILS.supportPhone}</a>
+          </address>
         </div>
         <div>
           <h3>Shop</h3>
           <Link href="/">Home</Link>
           <Link href="/shop">All gifts</Link>
+          <Link href="/rakhi-sale">Rakhi Sale & Offers</Link>
           <Link href="/occasion/birthday">Birthdays</Link>
           <Link href="/category/personalised-gifts">Personalised</Link>
           <Link href="/hamper-builder">Build a hamper</Link>
@@ -420,7 +422,7 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="shell footer-bottom">
-        <span>© 2026 {store?.name ?? 'GiftsByRashii'}</span>
+        <span>© 2026 {store?.name ?? OFFICIAL_STORE_DETAILS.brandName} · {OFFICIAL_STORE_DETAILS.legalName}</span>
         <span>Secure payments · Made with care</span>
       </div>
     </footer>
