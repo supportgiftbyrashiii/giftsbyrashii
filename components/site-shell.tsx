@@ -177,8 +177,8 @@ export function SiteHeader() {
               {label}
             </Link>
           ))}
-          <Link href="/rakhi-sale" className={`sale-link ${isActive('/rakhi-sale') ? 'active' : ''}`} aria-current={isActive('/rakhi-sale') ? 'page' : undefined}>
-            Rakhi Sale
+          <Link href="/offers" className={`sale-link ${isActive('/offers') ? 'active' : ''}`} aria-current={isActive('/offers') ? 'page' : undefined}>
+            Offers
           </Link>
         </nav>
       </header>
@@ -328,13 +328,8 @@ export function SiteHeader() {
                     <ChevronRight size={17} className="mobile-nav-arrow" />
                   </Link>
                 ))}
-                <Link
-                  href="/rakhi-sale"
-                  className={`mobile-nav-item sale-item ${isActive('/rakhi-sale') ? 'active' : ''}`}
-                  onClick={() => setOpen(false)}
-                >
-                  <span className="sale-text">✨ Rakhi Sale</span>
-                  <span className="sale-pill">OFFERS</span>
+                <Link href="/offers" className={`mobile-nav-item sale-item ${isActive('/offers') ? 'active' : ''}`} onClick={() => setOpen(false)}>
+                  <span className="sale-text">✨ Offers</span><span className="sale-pill">SAVE</span>
                 </Link>
               </nav>
             </div>
@@ -399,7 +394,7 @@ export function SiteFooter() {
           <h3>Shop</h3>
           <Link href="/">Home</Link>
           <Link href="/shop">All gifts</Link>
-          <Link href="/rakhi-sale">Rakhi Sale & Offers</Link>
+          <Link href="/offers">Offers</Link>
           <Link href="/occasion/birthday">Birthdays</Link>
           <Link href="/category/personalised-gifts">Personalised</Link>
           <Link href="/hamper-builder">Build a hamper</Link>

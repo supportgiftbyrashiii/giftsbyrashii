@@ -1,0 +1,28 @@
+.occasion-section{overflow:hidden;background:linear-gradient(180deg,#fff 0%,#fff8f5 100%)}
+.occasion-showcase{position:relative;margin-top:36px}
+.occasion-stage{position:relative;min-height:620px;border-radius:34px;overflow:hidden;background:#321a24;box-shadow:0 28px 80px rgba(67,28,42,.14)}
+.occasion-stage-media{position:absolute;inset:0 43% 0 0;background:#eadbd3;overflow:hidden}
+.occasion-stage-media:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 55%,rgba(50,26,36,.8) 100%)}
+.occasion-stage-media img{object-fit:cover!important;transition:transform .7s cubic-bezier(.2,.8,.2,1);animation:occasion-reveal .65s ease both}
+.occasion-stage:hover .occasion-stage-media img{transform:scale(1.025)}
+.occasion-stage-number{position:absolute;left:28px;top:26px;z-index:2;width:50px;height:50px;border:1px solid rgba(255,255,255,.7);border-radius:50%;display:grid;place-items:center;color:#fff;font:700 11px var(--font-body);backdrop-filter:blur(8px)}
+.occasion-stage-copy{position:absolute;z-index:2;inset:0 0 0 57%;padding:80px clamp(35px,5vw,76px);display:flex;flex-direction:column;justify-content:center;color:#fff}
+.occasion-stage-copy>small{font-size:9px;letter-spacing:.22em;font-weight:800;color:#eab4c4}
+.occasion-stage-copy h2{font:600 clamp(62px,7vw,104px)/.83 var(--font-heading);letter-spacing:-.055em;margin:18px 0;max-width:520px}
+.occasion-stage-copy p{color:#dbcbd1;font-size:14px;line-height:1.7;margin:0 0 28px}
+.occasion-stage-copy .button{width:max-content;background:#fff;color:#5b1630}.occasion-stage-copy .button:hover{background:#fbe6ec}.occasion-stage-copy .button svg{width:17px}
+.occasion-mark{position:absolute;right:8%;top:8%;color:#d88aa2;font:500 68px/1 var(--font-heading);opacity:.7}
+.occasion-slider-controls{position:absolute;right:30px;bottom:25px;z-index:3;display:flex;align-items:center;gap:12px;color:#fff}
+.occasion-slider-controls button{width:42px;height:42px;border:1px solid rgba(255,255,255,.3);border-radius:50%;background:rgba(255,255,255,.08);color:#fff;display:grid;place-items:center;backdrop-filter:blur(10px);cursor:pointer}
+.occasion-slider-controls button:hover{background:#fff;color:#5b1630}.occasion-slider-controls svg{width:16px}.occasion-slider-controls span{font-size:9px;letter-spacing:.13em;min-width:54px;text-align:center}
+.occasion-rail{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--line)}
+.occasion-rail button{position:relative;border:0;border-right:1px solid var(--line);background:transparent;padding:21px 8px;color:var(--muted);font:600 16px var(--font-heading);cursor:pointer;white-space:nowrap}
+.occasion-rail button:last-child{border-right:0}.occasion-rail button span{display:block;font:500 21px var(--font-heading);color:#bd8294;margin-bottom:4px}
+.occasion-rail button:after{content:"";position:absolute;left:12%;right:12%;bottom:-1px;height:2px;background:var(--berry);transform:scaleX(0);transition:transform .25s}
+.occasion-rail button.active{color:var(--berry);background:#fff}.occasion-rail button.active:after{transform:scaleX(1)}
+.occasion-auto-progress{height:3px;background:#eedfe3;overflow:hidden}.occasion-auto-progress i{display:block;height:100%;background:var(--berry);animation:occasion-progress 4.2s linear both}.occasion-auto-progress i.paused{animation-play-state:paused}
+@keyframes occasion-progress{from{width:0}to{width:100%}}@keyframes occasion-reveal{from{opacity:.5;transform:scale(1.04)}to{opacity:1;transform:scale(1)}}
+
+@media(max-width:800px){.occasion-stage{min-height:670px}.occasion-stage-media{inset:0 0 48%}.occasion-stage-media:after{background:linear-gradient(180deg,transparent 45%,#321a24 100%)}.occasion-stage-copy{inset:49% 0 0;padding:34px 28px 78px;justify-content:flex-start}.occasion-stage-copy h2{font-size:62px;margin:10px 0}.occasion-mark{right:25px;top:52%;font-size:48px}.occasion-slider-controls{left:24px;right:auto}.occasion-rail{display:flex;overflow-x:auto;scrollbar-width:none}.occasion-rail::-webkit-scrollbar{display:none}.occasion-rail button{min-width:145px}.occasion-showcase{width:100%}}
+@media(max-width:560px){.occasion-section{padding-top:58px}.occasion-section .section-heading{padding-inline:20px}.occasion-stage{border-radius:0;min-height:620px}.occasion-stage-media{inset:0 0 51%}.occasion-stage-copy{inset:47% 0 0;padding:38px 20px 74px}.occasion-stage-copy h2{font-size:50px}.occasion-stage-copy p{font-size:12px;margin-bottom:20px}.occasion-stage-copy .button{font-size:9px;padding:12px 15px}.occasion-mark{display:none}.occasion-slider-controls{left:18px;bottom:18px}.occasion-rail button{min-width:130px;padding:16px 8px;font-size:14px}}
+@media(prefers-reduced-motion:reduce){.occasion-auto-progress i,.occasion-stage-media img{animation:none}}

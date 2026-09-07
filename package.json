@@ -12,7 +12,8 @@
     "sites:dev": "vinext dev",
     "sites:build": "vinext build",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "catalog:import": "node scripts/import-shopify-catalog.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

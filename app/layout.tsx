@@ -8,6 +8,7 @@ import './storefront-modern.css';
 import './config-studio.css';
 import './json-free-ui.css';
 import './responsive.css';
+import './occasion-slider.css';
 import { CartProvider } from '@/components/cart-provider';
 import { ThemeStyle } from '@/components/theme-style';
 import { getSiteUrl, getSiteUrlObject } from '@/lib/site-url';

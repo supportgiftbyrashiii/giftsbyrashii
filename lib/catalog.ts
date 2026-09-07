@@ -10,7 +10,7 @@ export async function getProducts(query?: string): Promise<Product[]> {
   if (supabase) {
     let request = supabase.from('products').select(productSelect).eq('is_active', true).order('created_at', { ascending: false });
     if (query) request = request.or(`name.ilike.%${query}%,short_description.ilike.%${query}%,description.ilike.%${query}%`);
-    const { data, error } = await request.limit(120);
+    const { data, error } = await request.limit(1000);
     if (!error && data) return data.map((row) => mapProduct(row as unknown as Record<string, unknown>));
   }
   return demoProducts.filter((product) => !query || `${product.name} ${product.description} ${product.category} ${product.recipients.join(' ')} ${product.occasions.join(' ')}`.toLowerCase().includes(query.toLowerCase()));

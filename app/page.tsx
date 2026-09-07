@@ -8,19 +8,8 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { currentTimestamp } from '@/lib/time';
 import type { HomepageSection } from '@/lib/types';
 
-const rakhiSaleSection: HomepageSection = {
-  id: 'rakhi-sale',
-  type: 'rakhi_sale',
-  title: 'Rakhi gifts, wrapped in extra joy.',
-  subtitle: 'Celebrate the bond with thoughtful picks and festive savings on selected gifts.',
-  enabled: true,
-  sortOrder: 1.5,
-  config: {},
-};
-
 const defaultSections: HomepageSection[] = [
   ...demoHomepageSections,
-  rakhiSaleSection,
   { id: 'occasions', type: 'occasion_collection', title: 'Gifts for every beautiful reason', enabled: true, sortOrder: 4, config: {} },
   { id: 'prices', type: 'price_collection', title: 'Find their joy, your way', enabled: true, sortOrder: 5, config: {} },
   { id: 'hamper', type: 'custom_hamper', title: 'A hamper as unique as they are.', enabled: true, sortOrder: 6, config: {} },
@@ -34,8 +23,8 @@ export default async function Home() {
   const [products, supabase] = await Promise.all([getProducts(), createClient()]);
   let sections = defaultSections;
   let banners = [
-    { id: 'default-1', title: 'Gifts as lovely as she is', subtitle: 'Colorful little joys, curated with a whole lot of heart.', desktopImage: '/giftmitra-hero.png', url: '/category/gifts-for-her' },
-    { id: 'default-2', title: 'Build her dream hamper', subtitle: 'Choose the box, treats, keepsakes and your personal note.', desktopImage: 'https://images.unsplash.com/photo-1608755728617-aefab37d2edd?auto=format&fit=crop&w=1800&q=88', url: '/hamper-builder' },
+    { id: 'default-1', title: 'A beautiful reason to make their day', subtitle: 'Thoughtful gifts, personalised details and an unboxing they will remember.', desktopImage: 'https://cdn.shopify.com/s/files/1/0736/0072/9280/files/The-Shine-Cheers-Set-1.webp?v=1766771998', url: '/shop' },
+    { id: 'default-2', title: 'Build their dream hamper', subtitle: 'Choose the box, treats, keepsakes and your personal note.', desktopImage: 'https://cdn.shopify.com/s/files/1/0736/0072/9280/files/Five-Senses-Gift_3e424a83-3cf9-426c-8a23-a98f289505ab.webp?v=1766771999', url: '/hamper-builder' },
   ];
   let testimonials: { id: string; name: string; quote: string; rating: number }[] = [];
   let reels: { id: string; title: string; caption: string; videoUrl: string; thumbnailUrl?: string }[] = [];
@@ -48,8 +37,9 @@ export default async function Home() {
       supabase.from('reels').select('id,title,caption,video_url,thumbnail_url').eq('is_enabled', true).order('sort_order').limit(8),
     ]);
     if (sectionRows?.length) {
-      sections = sectionRows.map((row): HomepageSection => ({ id: row.id, type: row.section_type, title: row.title ?? '', subtitle: row.subtitle ?? undefined, enabled: row.is_enabled, sortOrder: row.sort_order, config: (row.configuration ?? {}) as Record<string, unknown> }));
-      if (!sections.some((section) => section.type === 'rakhi_sale')) sections.push(rakhiSaleSection);
+      const managed = sectionRows.filter((row) => row.section_type !== 'rakhi_sale').map((row): HomepageSection => ({ id: row.id, type: row.section_type, title: row.title ?? '', subtitle: row.subtitle ?? undefined, enabled: row.is_enabled, sortOrder: row.sort_order, config: (row.configuration ?? {}) as Record<string, unknown> }));
+      const missingDefaults = defaultSections.filter((fallback) => !managed.some((section) => section.type === fallback.type));
+      sections = [...managed, ...missingDefaults];
     }
     if (bannerRows?.length) banners = bannerRows.map((row) => ({ id: row.id, title: row.title ?? 'A beautiful surprise', subtitle: row.subtitle ?? undefined, desktopImage: row.desktop_image, mobileImage: row.mobile_image ?? undefined, url: row.url ?? '/shop' }));
     testimonials = (testimonialRows ?? []).map((row) => ({ id: row.id, name: row.name, quote: row.quote, rating: row.rating ?? 5 }));
