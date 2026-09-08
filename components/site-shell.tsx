@@ -1,8 +1,8 @@
 'use client';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   ChevronRight,
-  Gift,
   Heart,
   LogIn,
   LogOut,
@@ -41,12 +41,7 @@ type SessionState = {
 export function Logo() {
   return (
     <Link href="/" className="brand" aria-label="GiftsByRashii home">
-      <span className="brand-gift">
-        <Gift size={18} />
-      </span>
-      <span>
-        Gifts<span>ByRashii</span>
-      </span>
+      <Image className="brand-logo" src="/ChatGPT%20Image%20Sep%208,%202026,%2011_08_19%20PM.png" alt="Gifts by Rashii" width={64} height={64} priority />
     </Link>
   );
 }
