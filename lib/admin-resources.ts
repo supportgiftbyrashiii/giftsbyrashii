@@ -1,28 +1,484 @@
-export type AdminField={name:string;label:string;type?:'text'|'textarea'|'number'|'boolean'|'select'|'color'|'datetime'|'image';required?:boolean;options?:string[];source?:string;placeholder?:string;lookup?:{table:string;value:string;label:string}};
-export type AdminResource={title:string;description:string;table:string;primaryKey?:string;columns:string;fields:AdminField[];canCreate?:boolean;canDelete?:boolean;readOnly?:boolean};
-export const adminResources:Record<string,AdminResource>={
-categories:{title:'Categories',description:'Storefront taxonomy, images, SEO and ordering.',table:'categories',columns:'id,name,slug,description,image_url,seo_title,seo_description,is_active,sort_order',fields:[{name:'name',label:'Name',required:true},{name:'slug',label:'Slug',required:true},{name:'description',label:'Description',type:'textarea'},{name:'image_url',label:'Category image',type:'image'},{name:'seo_title',label:'SEO title'},{name:'seo_description',label:'SEO description',type:'textarea'},{name:'sort_order',label:'Sort order',type:'number'},{name:'is_active',label:'Active',type:'boolean'}]},
-collections:{title:'Collections',description:'Manual and rule-based merchandising collections.',table:'collections',columns:'id,name,slug,description,image_url,rules,is_active,starts_at,ends_at',fields:[{name:'name',label:'Name',required:true},{name:'slug',label:'Slug',required:true},{name:'description',label:'Description',type:'textarea'},{name:'image_url',label:'Image URL'},{name:'rule_tags',label:'Include product tags (comma separated)',source:'rules.tags'},{name:'minimum_price',label:'Minimum product price',type:'number',source:'rules.minimumPrice'},{name:'maximum_price',label:'Maximum product price',type:'number',source:'rules.maximumPrice'},{name:'featured_only',label:'Featured products only',type:'boolean',source:'rules.featuredOnly'},{name:'starts_at',label:'Starts at',type:'datetime'},{name:'ends_at',label:'Ends at',type:'datetime'},{name:'is_active',label:'Active',type:'boolean'}]},
-inventory:{title:'Inventory',description:'Live product stock and low-stock thresholds.',table:'products',columns:'id,name,sku,stock,low_stock_threshold,is_active',canCreate:false,canDelete:false,fields:[{name:'stock',label:'Stock',type:'number',required:true},{name:'low_stock_threshold',label:'Low-stock warning',type:'number',required:true},{name:'is_active',label:'Published',type:'boolean'}]},
-customers:{title:'Customers',description:'Customer profiles and support contact details.',table:'profiles',columns:'id,full_name,email,mobile,avatar_url,created_at',canCreate:false,canDelete:false,fields:[{name:'full_name',label:'Full name',required:true},{name:'mobile',label:'Mobile'},{name:'avatar_url',label:'Avatar URL'}]},
-coupons:{title:'Coupons',description:'Server-validated discount rules and validity.',table:'coupons',columns:'id,code,description,discount_type,value,minimum_amount,maximum_discount,starts_at,ends_at,total_usage_limit,usage_per_user,first_order_only,prepaid_only,minimum_quantity,is_active',fields:[{name:'code',label:'Coupon code',required:true},{name:'description',label:'Description',type:'textarea'},{name:'discount_type',label:'Discount type',type:'select',options:['percentage','fixed'],required:true},{name:'value',label:'Value',type:'number',required:true},{name:'minimum_amount',label:'Minimum order',type:'number'},{name:'maximum_discount',label:'Maximum discount',type:'number'},{name:'starts_at',label:'Starts at',type:'datetime',required:true},{name:'ends_at',label:'Ends at',type:'datetime',required:true},{name:'total_usage_limit',label:'Total usage limit',type:'number'},{name:'usage_per_user',label:'Uses per customer',type:'number'},{name:'minimum_quantity',label:'Minimum quantity',type:'number'},{name:'first_order_only',label:'First order only',type:'boolean'},{name:'prepaid_only',label:'Prepaid only',type:'boolean'},{name:'is_active',label:'Active',type:'boolean'}]},
-reviews:{title:'Reviews',description:'Approve, reject, hide and feature customer reviews.',table:'reviews',columns:'id,title,body,rating,status,is_featured,is_verified_purchase,created_at',canCreate:false,canDelete:false,fields:[{name:'status',label:'Moderation status',type:'select',options:['pending','approved','rejected','hidden'],required:true},{name:'is_featured',label:'Feature on storefront',type:'boolean'}]},
-occasions:{title:'Occasions',description:'Occasion-based gifting discovery.',table:'occasions',columns:'id,name,slug,image_url,is_active,sort_order',fields:[{name:'name',label:'Name',required:true},{name:'slug',label:'Slug',required:true},{name:'image_url',label:'Image URL'},{name:'sort_order',label:'Sort order',type:'number'},{name:'is_active',label:'Active',type:'boolean'}]},
-recipients:{title:'Recipients',description:'Shop-for recipient discovery groups.',table:'recipients',columns:'id,name,slug,image_url,is_active,sort_order',fields:[{name:'name',label:'Name',required:true},{name:'slug',label:'Slug',required:true},{name:'image_url',label:'Image URL'},{name:'sort_order',label:'Sort order',type:'number'},{name:'is_active',label:'Active',type:'boolean'}]},
-variants:{title:'Product variants',description:'SKU-level options, prices and stock.',table:'product_variants',columns:'id,product_id,sku,title,options,price,mrp,stock,is_active',fields:[{name:'product_id',label:'Product',required:true,lookup:{table:'products',value:'id',label:'name'}},{name:'sku',label:'Variant SKU',required:true},{name:'title',label:'Title',required:true},{name:'option_name',label:'Option name',source:'options.name',placeholder:'Size, Colour, Pack'},{name:'option_values',label:'Option choices (comma separated)',source:'options.values',placeholder:'Small, Medium, Large'},{name:'price',label:'Price',type:'number'},{name:'mrp',label:'MRP',type:'number'},{name:'stock',label:'Stock',type:'number'},{name:'is_active',label:'Active',type:'boolean'}]},
-'hamper-packaging':{title:'Custom hamper packaging',description:'Boxes, baskets and packaging available in the hamper builder.',table:'hamper_packaging',columns:'id,name,description,image_url,price,stock,is_active,sort_order',fields:[{name:'name',label:'Name',required:true},{name:'description',label:'Description',type:'textarea'},{name:'image_url',label:'Image URL'},{name:'price',label:'Price',type:'number',required:true},{name:'stock',label:'Stock',type:'number',required:true},{name:'sort_order',label:'Sort order',type:'number'},{name:'is_active',label:'Active',type:'boolean'}]},
-media:{title:'Media library',description:'Product image and video URL references.',table:'product_media',columns:'id,product_id,url,media_type,alt_text,sort_order',fields:[{name:'product_id',label:'Product',required:true,lookup:{table:'products',value:'id',label:'name'}},{name:'url',label:'Media URL',required:true},{name:'media_type',label:'Type',type:'select',options:['image','video'],required:true},{name:'alt_text',label:'Alt text'},{name:'sort_order',label:'Sort order',type:'number'}]},
-corporate:{title:'Corporate enquiries',description:'Bulk gifting leads and follow-up status.',table:'corporate_enquiries',columns:'id,company,contact_person,email,phone,quantity,budget,occasion,delivery_location,requirements,status,created_at',canCreate:false,canDelete:false,fields:[{name:'status',label:'Lead status',type:'select',options:['new','contacted','qualified','quoted','won','lost'],required:true},{name:'requirements',label:'Requirements / notes',type:'textarea'}]},
-'contact-submissions':{title:'Contact messages',description:'Every message submitted through the website contact form.',table:'contact_submissions',columns:'id,name,email,phone,subject,message,status,created_at',canCreate:false,canDelete:false,fields:[{name:'status',label:'Follow-up status',type:'select',options:['new','in_progress','resolved','closed'],required:true}]},
-newsletter:{title:'Newsletter subscribers',description:'Email addresses collected from every storefront newsletter form.',table:'newsletter_subscribers',columns:'id,email,status,created_at',canCreate:false,canDelete:false,fields:[{name:'status',label:'Subscription status',type:'select',options:['subscribed','unsubscribed'],required:true}]},
-pages:{title:'Website pages',description:'Manage every editable policy, help and editorial page shown on the website.',table:'pages',columns:'id,title,slug,content,seo_title,seo_description,is_published,updated_at',fields:[{name:'title',label:'Page title',required:true},{name:'slug',label:'Page URL slug',required:true,placeholder:'shipping-policy'},{name:'content_text',label:'Complete page content',type:'textarea',required:true,source:'content.text'},{name:'seo_title',label:'Browser / SEO title'},{name:'seo_description',label:'SEO description',type:'textarea'},{name:'is_published',label:'Published on website',type:'boolean'}]},
-faqs:{title:'Questions & answers',description:'Customer questions and answers shown across the website.',table:'faqs',columns:'id,question,answer,scope,scope_id,is_enabled,sort_order',fields:[{name:'question',label:'Question',required:true},{name:'answer',label:'Answer',type:'textarea',required:true},{name:'scope',label:'Scope',type:'select',options:['global','product','category','checkout'],required:true},{name:'scope_id',label:'Product/category UUID'},{name:'sort_order',label:'Sort order',type:'number'},{name:'is_enabled',label:'Enabled',type:'boolean'}]},
-banners:{title:'Sliders & banners',description:'Homepage slider artwork, copy and destination links.',table:'banners',columns:'id,title,subtitle,desktop_image,mobile_image,url,is_enabled,sort_order',fields:[{name:'title',label:'Title'},{name:'subtitle',label:'Subtitle',type:'textarea'},{name:'desktop_image',label:'Desktop image URL',required:true},{name:'mobile_image',label:'Mobile image URL'},{name:'url',label:'Destination URL'},{name:'sort_order',label:'Sort order',type:'number'},{name:'is_enabled',label:'Enabled',type:'boolean'}]},
-announcements:{title:'Announcement bar',description:'Promotional messages above the storefront.',table:'announcement_bars',columns:'id,text,icon,url,priority,is_enabled,background_color,text_color',fields:[{name:'text',label:'Message',required:true},{name:'icon',label:'Icon'},{name:'url',label:'URL'},{name:'priority',label:'Priority',type:'number'},{name:'background_color',label:'Background',type:'color'},{name:'text_color',label:'Text color',type:'color'},{name:'is_enabled',label:'Enabled',type:'boolean'}]},
-'client-logos':{title:'Client logos',description:'Corporate client trust logos.',table:'client_logos',columns:'id,name,logo_url,url,is_enabled,sort_order',fields:[{name:'name',label:'Client name',required:true},{name:'logo_url',label:'Logo URL',required:true},{name:'url',label:'Client URL'},{name:'sort_order',label:'Sort order',type:'number'},{name:'is_enabled',label:'Enabled',type:'boolean'}]},
-settings:{title:'Store settings',description:'Shipping, COD, payment, contact and operational configuration.',table:'site_settings',primaryKey:'key',columns:'key,value,updated_at',fields:[]},
-theme:{title:'Theme studio',description:'Colors, typography, radius and visual style without code.',table:'theme_settings',columns:'id,values,updated_at',canCreate:false,canDelete:false,fields:[]},
-payments:{title:'UPI Payments',description:'Manual UPI payments, submitted UTR numbers and admin verification state.',table:'payments',columns:'id,order_id,gateway,status,method,amount,currency,gateway_metadata,created_at',readOnly:true,fields:[]},
-'admin-users':{title:'Admin users',description:'Role-based platform access.',table:'admin_users',columns:'id,user_id,role_id,is_active,created_at',fields:[{name:'user_id',label:'User',required:true,lookup:{table:'profiles',value:'id',label:'email'}},{name:'role_id',label:'Role',required:true,lookup:{table:'roles',value:'id',label:'name'}},{name:'is_active',label:'Active',type:'boolean'}]},
-'audit-logs':{title:'Audit logs',description:'Immutable record of sensitive admin actions.',table:'audit_logs',columns:'id,action,entity_type,entity_id,metadata,created_at',readOnly:true,fields:[]}
+export type AdminField = {
+  name: string;
+  label: string;
+  type?:
+    | "text"
+    | "textarea"
+    | "number"
+    | "boolean"
+    | "select"
+    | "color"
+    | "datetime"
+    | "image";
+  required?: boolean;
+  multiple?: boolean;
+  options?: string[];
+  source?: string;
+  placeholder?: string;
+  lookup?: { table: string; value: string; label: string };
+};
+export type AdminResource = {
+  title: string;
+  description: string;
+  table: string;
+  primaryKey?: string;
+  columns: string;
+  fields: AdminField[];
+  canCreate?: boolean;
+  canDelete?: boolean;
+  readOnly?: boolean;
+};
+export const adminResources: Record<string, AdminResource> = {
+  categories: {
+    title: "Categories",
+    description: "Storefront taxonomy, images, SEO and ordering.",
+    table: "categories",
+    columns:
+      "id,name,slug,description,image_url,seo_title,seo_description,is_active,sort_order",
+    fields: [
+      { name: "name", label: "Name", required: true },
+      { name: "slug", label: "Slug", required: true },
+      { name: "description", label: "Description", type: "textarea" },
+      { name: "image_url", label: "Category image", type: "image" },
+      { name: "seo_title", label: "SEO title" },
+      { name: "seo_description", label: "SEO description", type: "textarea" },
+      { name: "sort_order", label: "Sort order", type: "number" },
+      { name: "is_active", label: "Active", type: "boolean" },
+    ],
+  },
+  collections: {
+    title: "Collections",
+    description: "Manual and rule-based merchandising collections.",
+    table: "collections",
+    columns:
+      "id,name,slug,description,image_url,rules,is_active,starts_at,ends_at",
+    fields: [
+      { name: "name", label: "Name", required: true },
+      { name: "slug", label: "Slug", required: true },
+      { name: "description", label: "Description", type: "textarea" },
+      { name: "image_url", label: "Image URL" },
+      {
+        name: "rule_tags",
+        label: "Include product tags (comma separated)",
+        source: "rules.tags",
+      },
+      {
+        name: "minimum_price",
+        label: "Minimum product price",
+        type: "number",
+        source: "rules.minimumPrice",
+      },
+      {
+        name: "maximum_price",
+        label: "Maximum product price",
+        type: "number",
+        source: "rules.maximumPrice",
+      },
+      {
+        name: "featured_only",
+        label: "Featured products only",
+        type: "boolean",
+        source: "rules.featuredOnly",
+      },
+      { name: "starts_at", label: "Starts at", type: "datetime" },
+      { name: "ends_at", label: "Ends at", type: "datetime" },
+      { name: "is_active", label: "Active", type: "boolean" },
+    ],
+  },
+  inventory: {
+    title: "Inventory",
+    description: "Live product stock and low-stock thresholds.",
+    table: "products",
+    columns: "id,name,sku,stock,low_stock_threshold,is_active",
+    canCreate: false,
+    canDelete: false,
+    fields: [
+      { name: "stock", label: "Stock", type: "number", required: true },
+      {
+        name: "low_stock_threshold",
+        label: "Low-stock warning",
+        type: "number",
+        required: true,
+      },
+      { name: "is_active", label: "Published", type: "boolean" },
+    ],
+  },
+  customers: {
+    title: "Customers",
+    description: "Customer profiles and support contact details.",
+    table: "profiles",
+    columns: "id,full_name,email,mobile,avatar_url,created_at",
+    canCreate: false,
+    canDelete: false,
+    fields: [
+      { name: "full_name", label: "Full name", required: true },
+      { name: "mobile", label: "Mobile" },
+      { name: "avatar_url", label: "Avatar URL" },
+    ],
+  },
+  coupons: {
+    title: "Coupons",
+    description: "Server-validated discount rules and validity.",
+    table: "coupons",
+    columns:
+      "id,code,description,discount_type,value,minimum_amount,maximum_discount,starts_at,ends_at,total_usage_limit,usage_per_user,first_order_only,prepaid_only,minimum_quantity,applicable_products,applicable_categories,is_active",
+    fields: [
+      { name: "code", label: "Coupon code", required: true },
+      { name: "description", label: "Description", type: "textarea" },
+      {
+        name: "discount_type",
+        label: "Discount type",
+        type: "select",
+        options: ["percentage", "fixed"],
+        required: true,
+      },
+      { name: "value", label: "Value", type: "number", required: true },
+      { name: "minimum_amount", label: "Minimum order", type: "number" },
+      { name: "maximum_discount", label: "Maximum discount", type: "number" },
+      {
+        name: "starts_at",
+        label: "Starts at",
+        type: "datetime",
+        required: true,
+      },
+      { name: "ends_at", label: "Ends at", type: "datetime", required: true },
+      { name: "total_usage_limit", label: "Total usage limit", type: "number" },
+      { name: "usage_per_user", label: "Uses per customer", type: "number" },
+      { name: "minimum_quantity", label: "Minimum quantity", type: "number" },
+      {
+        name: "applicable_products",
+        label: "Only these products",
+        multiple: true,
+        lookup: { table: "products", value: "id", label: "name" },
+      },
+      {
+        name: "applicable_categories",
+        label: "Only these categories",
+        multiple: true,
+        lookup: { table: "categories", value: "id", label: "name" },
+      },
+      { name: "first_order_only", label: "First order only", type: "boolean" },
+      { name: "prepaid_only", label: "Prepaid only", type: "boolean" },
+      { name: "is_active", label: "Active", type: "boolean" },
+    ],
+  },
+  reviews: {
+    title: "Reviews",
+    description: "Approve, reject, hide and feature customer reviews.",
+    table: "reviews",
+    columns:
+      "id,title,body,rating,status,is_featured,is_verified_purchase,created_at",
+    canCreate: false,
+    canDelete: false,
+    fields: [
+      {
+        name: "status",
+        label: "Moderation status",
+        type: "select",
+        options: ["pending", "approved", "rejected", "hidden"],
+        required: true,
+      },
+      { name: "is_featured", label: "Feature on storefront", type: "boolean" },
+    ],
+  },
+  occasions: {
+    title: "Occasions",
+    description: "Occasion-based gifting discovery.",
+    table: "occasions",
+    columns: "id,name,slug,image_url,is_active,sort_order",
+    fields: [
+      { name: "name", label: "Name", required: true },
+      { name: "slug", label: "Slug", required: true },
+      { name: "image_url", label: "Image URL" },
+      { name: "sort_order", label: "Sort order", type: "number" },
+      { name: "is_active", label: "Active", type: "boolean" },
+    ],
+  },
+  recipients: {
+    title: "Recipients",
+    description: "Shop-for recipient discovery groups.",
+    table: "recipients",
+    columns: "id,name,slug,image_url,is_active,sort_order",
+    fields: [
+      { name: "name", label: "Name", required: true },
+      { name: "slug", label: "Slug", required: true },
+      { name: "image_url", label: "Image URL" },
+      { name: "sort_order", label: "Sort order", type: "number" },
+      { name: "is_active", label: "Active", type: "boolean" },
+    ],
+  },
+  variants: {
+    title: "Product variants",
+    description: "SKU-level options, prices and stock.",
+    table: "product_variants",
+    columns: "id,product_id,sku,title,options,price,mrp,stock,is_active",
+    fields: [
+      {
+        name: "product_id",
+        label: "Product",
+        required: true,
+        lookup: { table: "products", value: "id", label: "name" },
+      },
+      { name: "sku", label: "Variant SKU", required: true },
+      { name: "title", label: "Title", required: true },
+      {
+        name: "option_name",
+        label: "Option name",
+        source: "options.name",
+        placeholder: "Size, Colour, Pack",
+      },
+      {
+        name: "option_values",
+        label: "Option choices (comma separated)",
+        source: "options.values",
+        placeholder: "Small, Medium, Large",
+      },
+      { name: "price", label: "Price", type: "number" },
+      { name: "mrp", label: "MRP", type: "number" },
+      { name: "stock", label: "Stock", type: "number" },
+      { name: "is_active", label: "Active", type: "boolean" },
+    ],
+  },
+  "hamper-packaging": {
+    title: "Custom hamper packaging",
+    description:
+      "Boxes, baskets and packaging available in the hamper builder.",
+    table: "hamper_packaging",
+    columns: "id,name,description,image_url,price,stock,is_active,sort_order",
+    fields: [
+      { name: "name", label: "Name", required: true },
+      { name: "description", label: "Description", type: "textarea" },
+      { name: "image_url", label: "Image URL" },
+      { name: "price", label: "Price", type: "number", required: true },
+      { name: "stock", label: "Stock", type: "number", required: true },
+      { name: "sort_order", label: "Sort order", type: "number" },
+      { name: "is_active", label: "Active", type: "boolean" },
+    ],
+  },
+  media: {
+    title: "Media library",
+    description: "Product image and video URL references.",
+    table: "product_media",
+    columns: "id,product_id,url,media_type,alt_text,sort_order",
+    fields: [
+      {
+        name: "product_id",
+        label: "Product",
+        required: true,
+        lookup: { table: "products", value: "id", label: "name" },
+      },
+      { name: "url", label: "Media URL", required: true },
+      {
+        name: "media_type",
+        label: "Type",
+        type: "select",
+        options: ["image", "video"],
+        required: true,
+      },
+      { name: "alt_text", label: "Alt text" },
+      { name: "sort_order", label: "Sort order", type: "number" },
+    ],
+  },
+  corporate: {
+    title: "Corporate enquiries",
+    description: "Bulk gifting leads and follow-up status.",
+    table: "corporate_enquiries",
+    columns:
+      "id,company,contact_person,email,phone,quantity,budget,occasion,delivery_location,requirements,status,created_at",
+    canCreate: false,
+    canDelete: false,
+    fields: [
+      {
+        name: "status",
+        label: "Lead status",
+        type: "select",
+        options: ["new", "contacted", "qualified", "quoted", "won", "lost"],
+        required: true,
+      },
+      { name: "requirements", label: "Requirements / notes", type: "textarea" },
+    ],
+  },
+  "contact-submissions": {
+    title: "Contact messages",
+    description: "Every message submitted through the website contact form.",
+    table: "contact_submissions",
+    columns: "id,name,email,phone,subject,message,status,created_at",
+    canCreate: false,
+    canDelete: false,
+    fields: [
+      {
+        name: "status",
+        label: "Follow-up status",
+        type: "select",
+        options: ["new", "in_progress", "resolved", "closed"],
+        required: true,
+      },
+    ],
+  },
+  newsletter: {
+    title: "Newsletter subscribers",
+    description:
+      "Email addresses collected from every storefront newsletter form.",
+    table: "newsletter_subscribers",
+    columns: "id,email,status,created_at",
+    canCreate: false,
+    canDelete: false,
+    fields: [
+      {
+        name: "status",
+        label: "Subscription status",
+        type: "select",
+        options: ["subscribed", "unsubscribed"],
+        required: true,
+      },
+    ],
+  },
+  pages: {
+    title: "Website pages",
+    description:
+      "Manage every editable policy, help and editorial page shown on the website.",
+    table: "pages",
+    columns:
+      "id,title,slug,content,seo_title,seo_description,is_published,updated_at",
+    fields: [
+      { name: "title", label: "Page title", required: true },
+      {
+        name: "slug",
+        label: "Page URL slug",
+        required: true,
+        placeholder: "shipping-policy",
+      },
+      {
+        name: "content_text",
+        label: "Complete page content",
+        type: "textarea",
+        required: true,
+        source: "content.text",
+      },
+      { name: "seo_title", label: "Browser / SEO title" },
+      { name: "seo_description", label: "SEO description", type: "textarea" },
+      { name: "is_published", label: "Published on website", type: "boolean" },
+    ],
+  },
+  faqs: {
+    title: "Questions & answers",
+    description: "Customer questions and answers shown across the website.",
+    table: "faqs",
+    columns: "id,question,answer,scope,scope_id,is_enabled,sort_order",
+    fields: [
+      { name: "question", label: "Question", required: true },
+      { name: "answer", label: "Answer", type: "textarea", required: true },
+      {
+        name: "scope",
+        label: "Scope",
+        type: "select",
+        options: ["global", "product", "category", "checkout"],
+        required: true,
+      },
+      { name: "scope_id", label: "Product/category UUID" },
+      { name: "sort_order", label: "Sort order", type: "number" },
+      { name: "is_enabled", label: "Enabled", type: "boolean" },
+    ],
+  },
+  banners: {
+    title: "Sliders & banners",
+    description: "Homepage slider artwork, copy and destination links.",
+    table: "banners",
+    columns:
+      "id,title,subtitle,desktop_image,mobile_image,url,is_enabled,sort_order",
+    fields: [
+      { name: "title", label: "Title" },
+      { name: "subtitle", label: "Subtitle", type: "textarea" },
+      { name: "desktop_image", label: "Desktop image URL", required: true },
+      { name: "mobile_image", label: "Mobile image URL" },
+      { name: "url", label: "Destination URL" },
+      { name: "sort_order", label: "Sort order", type: "number" },
+      { name: "is_enabled", label: "Enabled", type: "boolean" },
+    ],
+  },
+  announcements: {
+    title: "Announcement bar",
+    description: "Promotional messages above the storefront.",
+    table: "announcement_bars",
+    columns: "id,text,icon,url,priority,is_enabled,background_color,text_color",
+    fields: [
+      { name: "text", label: "Message", required: true },
+      { name: "icon", label: "Icon" },
+      { name: "url", label: "URL" },
+      { name: "priority", label: "Priority", type: "number" },
+      { name: "background_color", label: "Background", type: "color" },
+      { name: "text_color", label: "Text color", type: "color" },
+      { name: "is_enabled", label: "Enabled", type: "boolean" },
+    ],
+  },
+  "client-logos": {
+    title: "Client logos",
+    description: "Corporate client trust logos.",
+    table: "client_logos",
+    columns: "id,name,logo_url,url,is_enabled,sort_order",
+    fields: [
+      { name: "name", label: "Client name", required: true },
+      { name: "logo_url", label: "Logo URL", required: true },
+      { name: "url", label: "Client URL" },
+      { name: "sort_order", label: "Sort order", type: "number" },
+      { name: "is_enabled", label: "Enabled", type: "boolean" },
+    ],
+  },
+  settings: {
+    title: "Store settings",
+    description:
+      "Shipping, COD, payment, contact and operational configuration.",
+    table: "site_settings",
+    primaryKey: "key",
+    columns: "key,value,updated_at",
+    fields: [],
+  },
+  theme: {
+    title: "Theme studio",
+    description: "Colors, typography, radius and visual style without code.",
+    table: "theme_settings",
+    columns: "id,values,updated_at",
+    canCreate: false,
+    canDelete: false,
+    fields: [],
+  },
+  payments: {
+    title: "UPI Payments",
+    description:
+      "Manual UPI payments, submitted UTR numbers and admin verification state.",
+    table: "payments",
+    columns:
+      "id,order_id,gateway,status,method,amount,currency,gateway_metadata,created_at",
+    readOnly: true,
+    fields: [],
+  },
+  "admin-users": {
+    title: "Admin users",
+    description: "Role-based platform access.",
+    table: "admin_users",
+    columns: "id,user_id,role_id,is_active,created_at",
+    fields: [
+      {
+        name: "user_id",
+        label: "User",
+        required: true,
+        lookup: { table: "profiles", value: "id", label: "email" },
+      },
+      {
+        name: "role_id",
+        label: "Role",
+        required: true,
+        lookup: { table: "roles", value: "id", label: "name" },
+      },
+      { name: "is_active", label: "Active", type: "boolean" },
+    ],
+  },
+  "audit-logs": {
+    title: "Audit logs",
+    description: "Immutable record of sensitive admin actions.",
+    table: "audit_logs",
+    columns: "id,action,entity_type,entity_id,metadata,created_at",
+    readOnly: true,
+    fields: [],
+  },
 };
