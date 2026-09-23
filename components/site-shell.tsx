@@ -21,6 +21,7 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useCart } from './cart-provider';
 import { OFFICIAL_STORE_DETAILS } from '@/lib/store-details';
+import { SocialLinks, SocialRail, WhatsAppButton } from './social-contact-buttons';
 
 type StoreConfig = {
   navigation?: { label: string; url: string }[];
@@ -356,28 +357,17 @@ export function SiteFooter() {
       .catch(() => {});
   }, []);
   const store = config.settings?.store;
-  const social = Object.entries(config.settings?.social ?? {}).filter(([, url]) => url);
+  const configuredSocial = config.settings?.social ?? {};
+  const social = { ...configuredSocial, facebook: configuredSocial.facebook || 'https://www.facebook.com/giftsbyrashii' };
+  const whatsapp = config.settings?.store?.whatsapp;
+  const displayName = store?.name && store.name !== 'GiftMitra' ? store.name : OFFICIAL_STORE_DETAILS.brandName;
   return (
     <footer className="footer">
       <div className="shell footer-grid">
         <div>
           <Logo />
           <p>Joyful gifting, thoughtfully curated in India. Every box is made to feel personal.</p>
-          <div className="footer-social">
-            {social.length ? (
-              social.map(([name, url]) => (
-                <a key={name} href={url} target="_blank" rel="noreferrer">
-                  {name}
-                </a>
-              ))
-            ) : (
-              <>
-                <span>Instagram</span>
-                <span>Pinterest</span>
-                <span>Facebook</span>
-              </>
-            )}
-          </div>
+          <div className="footer-social"><SocialLinks instagram={configuredSocial.instagram} facebook={social.facebook} /><WhatsAppButton whatsapp={whatsapp} /></div>
           <address className="footer-contact">
             <b>{OFFICIAL_STORE_DETAILS.legalName}</b>
             <span>{OFFICIAL_STORE_DETAILS.address}</span>
@@ -412,11 +402,23 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="shell footer-bottom">
-        <span>© 2026 {store?.name ?? OFFICIAL_STORE_DETAILS.brandName} · {OFFICIAL_STORE_DETAILS.legalName}</span>
+        <span>© 2026 {displayName} · {OFFICIAL_STORE_DETAILS.legalName}</span>
         <span>Secure payments · Made with care</span>
       </div>
     </footer>
   );
+}
+
+export function GlobalSocialRail() {
+  const [config, setConfig] = useState<StoreConfig>({});
+  useEffect(() => {
+    fetch('/api/storefront-config')
+      .then(async (response) => (await response.json()) as StoreConfig)
+      .then(setConfig)
+      .catch(() => {});
+  }, []);
+  const social = config.settings?.social ?? {};
+  return <SocialRail whatsapp={config.settings?.store?.whatsapp} instagram={social.instagram} facebook={social.facebook || 'https://www.facebook.com/giftsbyrashii'} />;
 }
 
 export function StorefrontFrame({ children }: { children: React.ReactNode }) {

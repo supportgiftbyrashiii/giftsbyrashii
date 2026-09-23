@@ -2,6 +2,9 @@ import { demoProducts } from './demo-data';
 import { createAdminClient } from './supabase/admin';
 import { createClient } from './supabase/server';
 import type { Product } from './types';
+import { withTimeout } from './async';
+
+type CatalogResponse = { data: Record<string, unknown>[] | null; error: unknown };
 
 const productSelect = 'id,slug,name,short_description,description,sku,price,mrp,stock,rating_average,rating_count,is_personalized,is_featured,main_image_url,tags,whats_inside,specifications,personalization_config,created_at,category:categories(name,slug),product_media(url,sort_order),product_occasions(occasions(name,slug)),product_recipients(recipients(name,slug))';
 
@@ -10,8 +13,10 @@ export async function getProducts(query?: string): Promise<Product[]> {
   if (supabase) {
     let request = supabase.from('products').select(productSelect).eq('is_active', true).order('created_at', { ascending: false });
     if (query) request = request.or(`name.ilike.%${query}%,short_description.ilike.%${query}%,description.ilike.%${query}%`);
-    const { data, error } = await request.limit(1000);
-    if (!error && data) return data.map((row) => mapProduct(row as unknown as Record<string, unknown>));
+    const catalogQuery = request.limit(1000).then((result) => result as unknown as CatalogResponse);
+    const { data, error } = await withTimeout(catalogQuery, { data: null, error: new Error('Catalog request timed out') } as CatalogResponse, 2800);
+    if (!error && data) return data.map((row: Record<string, unknown>) => mapProduct(row));
+    return [];
   }
   return demoProducts.filter((product) => !query || `${product.name} ${product.description} ${product.category} ${product.recipients.join(' ')} ${product.occasions.join(' ')}`.toLowerCase().includes(query.toLowerCase()));
 }
@@ -21,6 +26,7 @@ export async function getProduct(slug: string) {
   if (supabase) {
     const { data, error } = await supabase.from('products').select(productSelect).eq('is_active', true).eq('slug', slug).maybeSingle();
     if (!error && data) return mapProduct(data as unknown as Record<string, unknown>);
+    return null;
   }
   return demoProducts.find((product) => product.slug === slug) ?? null;
 }

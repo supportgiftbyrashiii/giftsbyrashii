@@ -4,11 +4,12 @@ import Link from 'next/link';
 import { Archive, CheckSquare, Edit3, LoaderCircle, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { AdaptiveImage } from './adaptive-image';
 
-type Row = { id: string; name: string; sku: string; price: number; stock: number; is_active: boolean; publication_status?: string | null; updated_at: string };
+export type AdminProductRow = { id: string; name: string; sku: string; price: number; stock: number; is_active: boolean; publication_status?: string | null; updated_at: string; imageUrl: string; category: string };
 type Action = 'publish' | 'draft' | 'archive' | 'delete';
 
-export function AdminProductsTable({ products }: { products: Row[] }) {
+export function AdminProductsTable({ products }: { products: AdminProductRow[] }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [action, setAction] = useState<Action>('publish');
   const [busy, setBusy] = useState(false);
@@ -37,10 +38,11 @@ export function AdminProductsTable({ products }: { products: Row[] }) {
     </div>
     {notice && <p className="form-notice" role="status">{notice}</p>}
     <div className="admin-product-list" role="table" aria-label="Products">
-      <div className="admin-product-head" role="row"><span></span><span>Product</span><span>Price</span><span>Stock</span><span>Status</span><span>Updated</span><span>Actions</span></div>
+      <div className="admin-product-head" role="row"><span></span><span>Product</span><span>Category</span><span>Price</span><span>Stock</span><span>Status</span><span>Updated</span><span>Actions</span></div>
       {products.length ? products.map((product) => <div className={selectedSet.has(product.id) ? 'selected' : ''} role="row" key={product.id}>
         <span><input type="checkbox" checked={selectedSet.has(product.id)} onChange={() => toggle(product.id)} aria-label={`Select ${product.name}`} /></span>
-        <span><Link href={`/admin/products/${product.id}`}><b>{product.name}</b><small>{product.sku}</small></Link></span>
+        <span className="admin-product-identity"><AdaptiveImage src={product.imageUrl} alt={product.name} width={52} height={52} /><Link href={`/admin/products/${product.id}`}><b>{product.name}</b><small>{product.sku}</small></Link></span>
+        <span className="admin-product-category">{product.category}</span>
         <b>₹{Number(product.price).toLocaleString('en-IN')}</b><span>{product.stock}</span><span className="status-pill">{product.publication_status ?? (product.is_active ? 'published' : 'draft')}</span><span>{new Date(product.updated_at).toLocaleDateString('en-IN')}</span>
         <span className="product-row-actions"><Link href={`/admin/products/${product.id}`} aria-label={`Edit ${product.name}`}><Edit3 /></Link><button onClick={() => run([product.id], 'delete')} aria-label={`Delete ${product.name}`}><Trash2 /></button></span>
       </div>) : <p className="admin-empty">No products yet. Add your first product to start the catalog.</p>}

@@ -1,1 +1,7 @@
-import{CheckoutPage}from'@/components/checkout-page';import{StorefrontFrame}from'@/components/site-shell';export const metadata={title:'Secure checkout'};export default function Page(){return <StorefrontFrame><CheckoutPage/></StorefrontFrame>}
+import { CheckoutPage } from '@/components/checkout-page';
+
+export const metadata = { title: 'Secure checkout' };
+
+export default function Page() {
+  return <CheckoutPage />;
+}

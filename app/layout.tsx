@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { Cormorant_Garamond, Manrope } from 'next/font/google';
 import './globals.css';
 import './extended.css';
 import './admin.css';
@@ -10,20 +9,10 @@ import './json-free-ui.css';
 import './responsive.css';
 import './occasion-slider.css';
 import { CartProvider } from '@/components/cart-provider';
+import { GlobalSocialRail } from '@/components/site-shell';
 import { ThemeStyle } from '@/components/theme-style';
 import { getSiteUrl, getSiteUrlObject } from '@/lib/site-url';
 import { OFFICIAL_STORE_DETAILS } from '@/lib/store-details';
-
-const manrope = Manrope({
-  variable: '--font-manrope',
-  subsets: ['latin'],
-});
-
-const display = Cormorant_Garamond({
-  variable: '--font-display',
-  subsets: ['latin'],
-  weight: ['500', '600', '700'],
-});
 
 const siteUrlObject = getSiteUrlObject();
 const siteUrlString = getSiteUrl();
@@ -45,11 +34,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
-      <body
-        className={`${manrope.variable} ${display.variable} antialiased`}
-      >
+      <body className="antialiased">
         <ThemeStyle />
         <CartProvider>{children}</CartProvider>
+        <GlobalSocialRail />
         <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({'@context':'https://schema.org','@type':'Organization',name:OFFICIAL_STORE_DETAILS.legalName,alternateName:OFFICIAL_STORE_DETAILS.brandName,url:siteUrlString,logo:`${siteUrlString}/favicon.svg`,email:OFFICIAL_STORE_DETAILS.supportEmail,telephone:OFFICIAL_STORE_DETAILS.supportPhoneHref,address:{'@type':'PostalAddress',streetAddress:'4/1/24, K Sewani House, Lane Next To Mercedes Showroom, Nipania',addressLocality:'Indore',postalCode:'452010',addressRegion:'Madhya Pradesh',addressCountry:'IN'}}).replace(/</g,'\\u003c')}} />
       </body>
     </html>

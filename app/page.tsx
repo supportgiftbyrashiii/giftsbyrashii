@@ -7,16 +7,26 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { currentTimestamp } from '@/lib/time';
 import type { HomepageSection } from '@/lib/types';
+import { withTimeout } from '@/lib/async';
+
+type SectionRow = { id: string; section_type: string; title: string | null; subtitle?: string | null; is_enabled: boolean; sort_order: number; configuration?: unknown };
+type BannerRow = { id: string; title?: string | null; subtitle?: string | null; desktop_image: string; mobile_image?: string | null; url?: string | null };
+type TestimonialRow = { id: string; name: string; quote: string; rating?: number | null };
+type ReelRow = { id: string; title?: string | null; caption?: string | null; video_url: string; thumbnail_url?: string | null };
+type CategoryRow = { id: string; name: string; slug: string; image_url?: string | null };
+type QueryResult<T> = { data: T[] | null };
 
 const defaultSections: HomepageSection[] = [
   ...demoHomepageSections,
-  { id: 'occasions', type: 'occasion_collection', title: 'Gifts for every beautiful reason', enabled: true, sortOrder: 4, config: {} },
-  { id: 'prices', type: 'price_collection', title: 'Find their joy, your way', enabled: true, sortOrder: 5, config: {} },
-  { id: 'hamper', type: 'custom_hamper', title: 'A hamper as unique as they are.', enabled: true, sortOrder: 6, config: {} },
-  { id: 'corporate', type: 'corporate_gifting', title: 'Make work feel a little more wonderful.', enabled: true, sortOrder: 7, config: {} },
-  { id: 'testimonials', type: 'testimonials', title: 'Notes that made us smile', enabled: true, sortOrder: 8, config: {} },
-  { id: 'usp', type: 'usp', title: 'Why GiftsByRashii', enabled: true, sortOrder: 9, config: {} },
-  { id: 'newsletter', type: 'newsletter', title: 'Be the first to know what’s worth gifting.', enabled: true, sortOrder: 10, config: {} },
+  { id: 'new-arrivals', type: 'featured_collection', title: 'Freshly picked for their next happy moment', subtitle: 'New arrivals, thoughtful details, and gifts that feel instantly personal.', enabled: true, sortOrder: 4, config: {} },
+  { id: 'gift-moments', type: 'gift_moments', title: 'Small details. Big feelings.', subtitle: 'Every order is wrapped, checked, and sent with a little extra joy.', enabled: true, sortOrder: 5, config: {} },
+  { id: 'occasions', type: 'occasion_collection', title: 'Gifts for every beautiful reason', enabled: true, sortOrder: 6, config: {} },
+  { id: 'prices', type: 'price_collection', title: 'Find their joy, your way', enabled: true, sortOrder: 7, config: {} },
+  { id: 'hamper', type: 'custom_hamper', title: 'A hamper as unique as they are.', enabled: true, sortOrder: 8, config: {} },
+  { id: 'corporate', type: 'corporate_gifting', title: 'Make work feel a little more wonderful.', enabled: true, sortOrder: 9, config: {} },
+  { id: 'testimonials', type: 'testimonials', title: 'Notes that made us smile', enabled: true, sortOrder: 10, config: {} },
+  { id: 'usp', type: 'usp', title: 'Why GiftsByRashii', enabled: true, sortOrder: 11, config: {} },
+  { id: 'newsletter', type: 'newsletter', title: 'Be the first to know what’s worth gifting.', enabled: true, sortOrder: 12, config: {} },
 ];
 
 export default async function Home() {
@@ -31,26 +41,27 @@ export default async function Home() {
   let categories: { id: string; name: string; slug: string; imageUrl?: string | null }[] = [];
   let coupons: { id: string; code: string; description: string | null; discount_type: 'percentage' | 'fixed'; value: number; minimum_amount: number }[] = [];
   if (supabase) {
-    const [{ data: sectionRows }, { data: bannerRows }, { data: testimonialRows }, { data: reelRows }, { data: categoryRows }] = await Promise.all([
+    const homepageQueries = Promise.all([
       supabase.from('homepage_sections').select('*').eq('is_enabled', true).order('sort_order'),
       supabase.from('banners').select('*').eq('is_enabled', true).order('sort_order'),
       supabase.from('testimonials').select('id,name,quote,rating').eq('is_enabled', true).order('sort_order').limit(8),
       supabase.from('reels').select('id,title,caption,video_url,thumbnail_url').eq('is_enabled', true).order('sort_order').limit(8),
       supabase.from('categories').select('id,name,slug,image_url').eq('is_active', true).order('sort_order').limit(12),
-    ]);
+    ]) as unknown as Promise<[QueryResult<SectionRow>, QueryResult<BannerRow>, QueryResult<TestimonialRow>, QueryResult<ReelRow>, QueryResult<CategoryRow>]>;
+    const [{ data: sectionRows }, { data: bannerRows }, { data: testimonialRows }, { data: reelRows }, { data: categoryRows }] = await withTimeout(homepageQueries, [{ data: null }, { data: null }, { data: null }, { data: null }, { data: null }], 2800);
     if (sectionRows?.length) {
-      const managed = sectionRows.filter((row) => row.section_type !== 'rakhi_sale' && row.section_type !== 'category_circles').map((row): HomepageSection => ({ id: row.id, type: row.section_type, title: row.title ?? '', subtitle: row.subtitle ?? undefined, enabled: row.is_enabled, sortOrder: row.sort_order, config: (row.configuration ?? {}) as Record<string, unknown> }));
-      const missingDefaults = defaultSections.filter((fallback) => !managed.some((section) => section.type === fallback.type));
+      const managed = sectionRows.filter((row: SectionRow) => row.section_type !== 'rakhi_sale' && row.section_type !== 'category_circles').map((row: SectionRow): HomepageSection => ({ id: row.id, type: row.section_type, title: row.title ?? '', subtitle: row.subtitle ?? undefined, enabled: row.is_enabled, sortOrder: row.sort_order, config: (row.configuration ?? {}) as Record<string, unknown> }));
+      const missingDefaults = defaultSections.filter((fallback) => !managed.some((section: HomepageSection) => section.type === fallback.type));
       sections = [...managed, ...missingDefaults];
     }
-    if (bannerRows?.length) banners = bannerRows.map((row) => ({ id: row.id, title: row.title ?? 'A beautiful surprise', subtitle: row.subtitle ?? undefined, desktopImage: row.desktop_image, mobileImage: row.mobile_image ?? undefined, url: row.url ?? '/shop' }));
-    testimonials = (testimonialRows ?? []).map((row) => ({ id: row.id, name: row.name, quote: row.quote, rating: row.rating ?? 5 }));
-    if (reelRows?.length) reels = reelRows.map((row) => ({ id: row.id, title: row.title ?? 'GiftsByRashii moment', caption: row.caption ?? '', videoUrl: row.video_url, thumbnailUrl: row.thumbnail_url ?? undefined }));
-    categories = (categoryRows ?? []).map((row) => ({ id: row.id, name: row.name, slug: row.slug, imageUrl: row.image_url }));
+    if (bannerRows?.length) banners = bannerRows.map((row: BannerRow) => ({ id: row.id, title: row.title ?? 'A beautiful surprise', subtitle: row.subtitle ?? '', desktopImage: row.desktop_image, mobileImage: row.mobile_image ?? undefined, url: row.url ?? '/shop' }));
+    testimonials = (testimonialRows ?? []).map((row: TestimonialRow) => ({ id: row.id, name: row.name, quote: row.quote, rating: row.rating ?? 5 }));
+    if (reelRows?.length) reels = reelRows.map((row: ReelRow) => ({ id: row.id, title: row.title ?? 'GiftsByRashii moment', caption: row.caption ?? '', videoUrl: row.video_url, thumbnailUrl: row.thumbnail_url ?? undefined }));
+    categories = (categoryRows ?? []).map((row: CategoryRow) => ({ id: row.id, name: row.name, slug: row.slug, imageUrl: row.image_url }));
   }
   const admin = createAdminClient();
   if (admin) {
-    const { data } = await admin.from('coupons').select('id,code,description,discount_type,value,minimum_amount,starts_at,ends_at').eq('is_active', true).order('created_at', { ascending: false }).limit(6);
+    const { data } = await withTimeout(admin.from('coupons').select('id,code,description,discount_type,value,minimum_amount,starts_at,ends_at').eq('is_active', true).order('created_at', { ascending: false }).limit(6).then((result) => ({ data: result.data })), { data: null }, 1800);
     const now = currentTimestamp();
     coupons = (data ?? []).filter((coupon) => new Date(coupon.starts_at).getTime() <= now && (!coupon.ends_at || new Date(coupon.ends_at).getTime() >= now)).map((coupon) => ({ id: coupon.id, code: coupon.code, description: coupon.description, discount_type: coupon.discount_type, value: Number(coupon.value), minimum_amount: Number(coupon.minimum_amount) }));
   }

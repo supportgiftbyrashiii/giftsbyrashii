@@ -1,3 +1,6 @@
+import Link from 'next/link';
+import { ArrowUpRight } from 'lucide-react';
+import { summarizeCustomerOrders } from '@/lib/admin-customers';
 import { requireAdmin } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -14,11 +17,9 @@ export default async function CustomersPage() {
     admin.from('orders').select('user_id,total,status'),
   ]);
   const profileById = new Map((profiles ?? []).map((profile) => [profile.id, profile]));
-  const orderStats = new Map<string, { count: number; spend: number }>();
+  const ordersByUser = new Map<string, Array<{ total: number | string | null; status: string }>>();
   for (const order of orders ?? []) {
-    if (order.status === 'cancelled') continue;
-    const current = orderStats.get(order.user_id) ?? { count: 0, spend: 0 };
-    orderStats.set(order.user_id, { count: current.count + 1, spend: current.spend + Number(order.total) });
+    ordersByUser.set(order.user_id, [...(ordersByUser.get(order.user_id) ?? []), { total: order.total, status: order.status }]);
   }
   const users = authData?.users ?? [];
 
@@ -32,9 +33,9 @@ export default async function CustomersPage() {
         const metadata = user.user_metadata ?? {};
         const name = profile?.full_name || String(metadata.full_name ?? user.email?.split('@')[0] ?? 'Customer');
         const mobile = profile?.mobile || String(metadata.mobile ?? user.phone ?? '—');
-        const stats = orderStats.get(user.id) ?? { count: 0, spend: 0 };
+        const stats = summarizeCustomerOrders(ordersByUser.get(user.id));
         return <article key={user.id}>
-          <span><b>{name}</b><small>{user.id.slice(0, 18)}</small></span>
+          <span><Link className="admin-customer-link" href={`/admin/customers/${user.id}`}><b>{name}</b><ArrowUpRight /></Link><small>{user.id.slice(0, 18)}</small></span>
           <span><b>{profile?.email || user.email || 'No email'}</b><small>{mobile}</small></span>
           <span><b>{new Date(user.created_at).toLocaleDateString('en-IN')}</b><small>{user.last_sign_in_at ? `Last login ${new Date(user.last_sign_in_at).toLocaleString('en-IN')}` : 'Never signed in'}</small></span>
           <span><b>{stats.count} orders</b><small>₹{stats.spend.toLocaleString('en-IN')}</small></span>
